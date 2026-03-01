@@ -47,6 +47,40 @@ nav .brand b{font-weight:700;letter-spacing:2px}
 nav .links a{margin-left:20px;opacity:.95}
 nav .links a:hover{color:var(--alpine)}
 
+/* Hamburger (mobile) */
+.hamburger{
+  display:none;
+  width:44px;height:44px;border-radius:8px;border:0;background:transparent;
+  align-items:center;justify-content:center;cursor:pointer;gap:4px;
+}
+.hamburger .line{display:block;width:20px;height:2px;background:var(--text);transition:transform 320ms cubic-bezier(.2,.9,.2,1),opacity 220ms ease}
+.hamburger .line + .line{margin-top:5px}
+
+/* Mobile slide-up menu */
+.mobile-menu{
+  position:fixed;left:0;right:0;bottom:0;height:64vh;max-height:92vh;
+  background:linear-gradient(180deg, rgba(0,0,0,0.96), rgba(0,0,0,0.99));
+  transform:translateY(100%);transition:transform 360ms cubic-bezier(.2,.9,.2,1);
+  z-index:1300;padding:28px 6%;display:flex;flex-direction:column;gap:18px;
+  border-top-left-radius:14px;border-top-right-radius:14px;backdrop-filter:blur(6px);
+}
+.mobile-menu.open{transform:translateY(0)}
+.mobile-menu .links{display:flex;flex-direction:column;gap:14px}
+.mobile-menu .links a{font-size:20px;color:var(--text);text-transform:none;padding:8px 0}
+
+.mobile-menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.4);opacity:0;visibility:hidden;transition:opacity 240ms ease;z-index:1250}
+body.menu-open .mobile-menu-backdrop{opacity:1;visibility:visible}
+body.menu-open .mobile-menu{transform:translateY(0)}
+
+/* transform hamburger to X */
+.hamburger.open .line:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open .line:nth-child(2){opacity:0}
+.hamburger.open .line:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+@media (max-width:920px){
+  nav .links{display:none}
+  .hamburger{display:flex}
+}
 /* ========== HERO ========== */
 .hero{position:relative;height:100vh;min-height:620px;overflow:hidden;display:block}
 .hero-media{position:absolute;inset:0;z-index:0;pointer-events:none}
@@ -1089,7 +1123,26 @@ footer a:hover{color:var(--alpine)}
     <a href="#mappa">Mappa</a>
     <a href="#archivio">Archivio</a>
   </div>
+  <button class="hamburger" aria-label="Apri menu" aria-expanded="false" aria-controls="mobile-menu">
+    <span class="line"></span>
+    <span class="line"></span>
+    <span class="line"></span>
+  </button>
 </nav>
+
+<div id="mobile-backdrop" class="mobile-menu-backdrop" tabindex="-1" aria-hidden="true"></div>
+<div id="mobile-menu" class="mobile-menu" aria-hidden="true">
+  <nav role="navigation" aria-label="Menu principale mobile">
+    <div class="links">
+      <a href="#capsula">Capsula</a>
+      <a href="#sfida">La Sfida</a>
+      <a href="#opera">Opera</a>
+      <a href="#galleria">Galleria</a>
+      <a href="#mappa">Mappa</a>
+      <a href="#archivio">Archivio</a>
+    </div>
+  </nav>
+</div>
 
 <!-- HERO -->
 <header class="hero" id="top">
@@ -2087,10 +2140,40 @@ if(!reduceMotion){
    ============================ */
 document.getElementById('year').textContent = new Date().getFullYear();
 </script>
+<script>
+(function(){
+  var btn = document.querySelector('.hamburger');
+  var mobile = document.getElementById('mobile-menu');
+  var backdrop = document.getElementById('mobile-backdrop');
+  if(!btn || !mobile) return;
+
+  function openMenu(){
+    document.body.classList.add('menu-open');
+    btn.classList.add('open');
+    btn.setAttribute('aria-expanded','true');
+    mobile.setAttribute('aria-hidden','false');
+    // focus first link
+    var first = mobile.querySelector('a'); if(first) first.focus();
+  }
+  function closeMenu(){
+    document.body.classList.remove('menu-open');
+    btn.classList.remove('open');
+    btn.setAttribute('aria-expanded','false');
+    mobile.setAttribute('aria-hidden','true');
+    btn.focus();
+  }
+
+  btn.addEventListener('click', function(){
+    if(document.body.classList.contains('menu-open')) closeMenu(); else openMenu();
+  });
+  backdrop && backdrop.addEventListener('click', closeMenu);
+  mobile.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeMenu); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && document.body.classList.contains('menu-open')) closeMenu(); });
+})();
+</script>
 </body>
 
 </html>
-
 
 
 
